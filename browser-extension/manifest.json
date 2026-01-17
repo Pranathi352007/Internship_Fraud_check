@@ -1,0 +1,51 @@
+console.log("popup.js loaded");
+
+let detectedUrl = "";
+
+// Get current tab URL (handles redirects)
+chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  if (tabs && tabs.length > 0) {
+    detectedUrl = tabs[0].pendingUrl || tabs[0].url || "";
+    detectedUrl = detectedUrl.toLowerCase();
+    document.getElementById("url").innerText = detectedUrl;
+  } else {
+    document.getElementById("url").innerText = "Unable to detect URL";
+  }
+});
+
+// Check Risk Button
+document.getElementById("check").addEventListener("click", function () {
+
+  const resultBox = document.getElementById("result");
+  resultBox.style.display = "block";
+
+  let risk = "Safe";
+  resultBox.className = "result safe";
+
+  // 🔴 HIGH RISK: payment + URL shorteners
+  if (
+    detectedUrl.includes("bit.ly") ||
+    detectedUrl.includes("tinyurl") ||
+    detectedUrl.includes("shorturl") ||
+    detectedUrl.includes("pay") ||
+    detectedUrl.includes("fee")
+  ) {
+    risk = "Highly Risky";
+    resultBox.className = "result risky";
+  }
+
+  // 🟡 CAUTIOUS: file-sharing & internship context
+  else if (
+    detectedUrl.includes("drive.google.com/file") ||
+    detectedUrl.includes("docs.google.com") ||
+    detectedUrl.includes("dropbox.com") ||
+    detectedUrl.includes("internship") ||
+    detectedUrl.includes("offer") ||
+    detectedUrl.includes("apply")
+  ) {
+    risk = "Cautious";
+    resultBox.className = "result caution";
+  }
+
+  resultBox.innerText = "Risk Level: " + risk;
+});
